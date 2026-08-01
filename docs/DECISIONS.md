@@ -163,6 +163,7 @@ data volumes. Revisit only if this becomes a measured performance problem.
 
 **Decision:** Status transitions are fully automatic, enforced entirely in
 the backend (`recalculateSeriesStatus`, `userEpisodes.controller.js`):
+
 - Add to list → always starts at `watchlist`.
 - Toggling "add" again while already listed removes the row entirely (no
   manual status picker for this specific action).
@@ -204,3 +205,19 @@ watch-event-history feature exists.
 (#002) deliberately leaves room to add this later by relaxing the
 constraint, without a schema migration at that point. Not building it now
 is a scope decision, not a technical limitation.
+
+---
+
+### 013 — TMDB browse routes stay as thin pass-throughs
+
+**Decision:** Expose TMDB discovery categories directly through
+`/api/series/popular`, `/top-rated`, `/airing-today`, and `/on-the-air` as
+thin backend pass-throughs.
+
+**Alternatives considered:** Fetch only popular series, or merge TMDB browse
+categories into a single endpoint with a query parameter.
+
+**Reasoning:** The frontend already treats these as separate browse tabs, so
+keeping them as distinct routes keeps the API explicit and avoids extra
+branching on the client. Each endpoint remains a simple, cache-free TMDB
+proxy, matching the existing popular-series behavior.

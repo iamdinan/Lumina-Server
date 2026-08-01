@@ -13,7 +13,7 @@ frontend/backend versions. No backend code changed in that session._
   — nullable, filled in later via `PATCH /users/me` rather than at signup.
 - Endpoints implemented:
   - Health check
-  - TMDB search, popular, import (transactional upsert)
+  - TMDB search, popular, top-rated, airing-today, on-the-air, import (transactional upsert)
   - Register, login, get-me, update-profile, watch stats
   - Watchlist CRUD (add/update-status/list/remove), get-status, progress
   - Mark/unmark watched, bulk mark-completed
@@ -66,6 +66,10 @@ separate frontend and backend versions at the user's request. No backend
 behavior touched — the three open issues above (stats, checkbox/mark-watched,
 profile columns) remain exactly as before and should be the first thing
 checked in the next working session.
+
+**Current session:** Added TMDB browse endpoints for top rated, airing today,
+and on the air series, alongside the existing popular browse route. The API
+surface now mirrors TMDB's main TV discovery categories.
 
 **Prior session:** Implemented the watchlist/watching/completed automatic
 state machine end-to-end (`recalculateSeriesStatus`, `getSeriesStatus`

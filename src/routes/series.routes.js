@@ -15,5 +15,8 @@ router.post(
   seriesController.importSeries,
 );
 router.get("/popular", seriesController.getPopular);
+router.get("/top-rated", seriesController.getTopRated);
+router.get("/airing-today", seriesController.getAiringToday);
+router.get("/on-the-air", seriesController.getOnTheAir);
 
 module.exports = router;
