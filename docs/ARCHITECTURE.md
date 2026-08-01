@@ -12,8 +12,9 @@ React SPA  ──HTTPS/JSON──►  Express API  ──┬──► PostgreSQL
                                              │     seasons, episodes,
                                              │     user_series, user_episodes)
                                              └──► TMDB REST API (search,
-                                                   series/season details,
-                                                   popular)
+                   series/season details,
+                   popular, top-rated,
+                   airing today, on the air)
 ```
 
 ## Folder breakdown
@@ -24,7 +25,8 @@ src/
   config/
     db.js                    # pg Pool instance, exported singleton
   routes/
-    series.routes.js         # /api/series/* — search, popular, import
+    series.routes.js         # /api/series/* — search, popular, top-rated,
+                             # airing-today, on-the-air, import
     users.routes.js          # /api/users/* — register, login, me, stats, profile
     userSeries.routes.js     # /api/users/me/series/* — watchlist CRUD, status, progress
     userEpisodes.routes.js   # /api/users/me/episodes/* — mark/unmark watched
@@ -81,14 +83,18 @@ All FKs use `ON DELETE CASCADE`.
 ## Request lifecycle — key flows
 
 **Search → import (TMDB → local cache)**
+
 1. `GET /api/series/search?q=...` → `tmdb.service.searchSeries` → returns
    raw TMDB results, nothing written to DB.
-2. `POST /api/series/:tmdbId/import` → fetches full series + season +
+2. `GET /api/series/popular`, `/top-rated`, `/airing-today`, `/on-the-air`
+   → direct TMDB browse passthroughs, nothing written to DB.
+3. `POST /api/series/:tmdbId/import` → fetches full series + season +
    episode details from TMDB inside a single Postgres transaction, upserts
    into `series` → `seasons` → `episodes` (`ON CONFLICT DO UPDATE`, keyed on
    each table's `tmdb_*_id`), returns the internal `series_id`.
 
 **Watch-status state machine** (fully server-side, see DECISIONS.md #011)
+
 - `POST /users/me/series/:seriesId` inserts `user_series` with
   `status = 'watchlist'` (`ON CONFLICT DO NOTHING`).
 - `POST /users/me/episodes/:episodeId` (mark watched): looks up the episode's

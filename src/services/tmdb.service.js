@@ -26,9 +26,27 @@ async function getPopularSeries() {
   return res.data.results;
 }
 
+async function getTopRatedSeries() {
+  const res = await tmdb.get("/tv/top_rated");
+  return res.data.results;
+}
+
+async function getAiringTodaySeries() {
+  const res = await tmdb.get("/tv/airing_today");
+  return res.data.results;
+}
+
+async function getOnTheAirSeries() {
+  const res = await tmdb.get("/tv/on_the_air");
+  return res.data.results;
+}
+
 module.exports = {
   searchSeries,
   getSeriesDetails,
   getSeasonDetails,
   getPopularSeries,
+  getTopRatedSeries,
+  getAiringTodaySeries,
+  getOnTheAirSeries,
 };

@@ -102,4 +102,26 @@ const getPopular = asyncHandler(async (req, res) => {
   res.json(results);
 });
 
-module.exports = { search, importSeries, getPopular };
+const getTopRated = asyncHandler(async (req, res) => {
+  const results = await tmdbService.getTopRatedSeries();
+  res.json(results);
+});
+
+const getAiringToday = asyncHandler(async (req, res) => {
+  const results = await tmdbService.getAiringTodaySeries();
+  res.json(results);
+});
+
+const getOnTheAir = asyncHandler(async (req, res) => {
+  const results = await tmdbService.getOnTheAirSeries();
+  res.json(results);
+});
+
+module.exports = {
+  search,
+  importSeries,
+  getPopular,
+  getTopRated,
+  getAiringToday,
+  getOnTheAir,
+};
