@@ -174,6 +174,55 @@ const getWatchStats = asyncHandler(async (req, res) => {
   });
 });
 
+// GET /api/users/me/activity?year=YYYY
+const getWatchActivity = asyncHandler(async (req, res) => {
+  const [clockResult, daysResult] = await Promise.all([
+    pool.query("SELECT TO_CHAR(CURRENT_DATE, 'YYYY-MM-DD') AS today"),
+    pool.query(
+      `SELECT TO_CHAR(watched_at::date, 'YYYY-MM-DD') AS date,
+              COUNT(*)::int AS count
+       FROM user_episodes
+       WHERE user_id = $1 AND watched_at < CURRENT_DATE + INTERVAL '1 day'
+       GROUP BY watched_at::date
+       ORDER BY watched_at::date DESC`,
+      [req.user.userId],
+    ),
+  ]);
+
+  const today = clockResult.rows[0].today;
+  const currentYear = Number(today.slice(0, 4));
+  const year = req.query.year ? Number(req.query.year) : currentYear;
+  const counts = new Map(daysResult.rows.map(({ date, count }) => [date, count]));
+  const previousDay = (date) => {
+    const day = new Date(`${date}T00:00:00Z`);
+    day.setUTCDate(day.getUTCDate() - 1);
+    return day.toISOString().slice(0, 10);
+  };
+
+  let streakDate = counts.has(today) ? today : previousDay(today);
+  let currentStreak = 0;
+  while (counts.has(streakDate)) {
+    currentStreak += 1;
+    streakDate = previousDay(streakDate);
+  }
+
+  const firstActivityYear = daysResult.rows.length
+    ? Number(daysResult.rows.at(-1).date.slice(0, 4))
+    : currentYear;
+  const availableYears = Array.from(
+    { length: currentYear - firstActivityYear + 1 },
+    (_, index) => currentYear - index,
+  );
+
+  res.json({
+    today,
+    year,
+    available_years: availableYears,
+    current_streak: currentStreak,
+    days: daysResult.rows.filter(({ date }) => Number(date.slice(0, 4)) === year),
+  });
+});
+
 const markSeriesCompleted = asyncHandler(async (req, res) => {
   const userId = req.user.userId;
   const { seriesId } = req.params;
@@ -205,5 +254,6 @@ module.exports = {
   unmarkWatched,
   getSeriesProgress,
   getWatchStats,
+  getWatchActivity,
   markSeriesCompleted,
 };
