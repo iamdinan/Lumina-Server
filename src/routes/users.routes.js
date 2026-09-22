@@ -10,6 +10,8 @@ const { authLimiter } = require("../middleware/rateLimit.middleware");
 const { requireAuth } = require("../middleware/auth.middleware");
 const userEpisodesController = require("../controllers/userEpisodes.controller");
 const { updateProfileValidator } = require("../validators/users.validator");
+const { activityYearValidator } = require("../validators/userEpisodes.validator");
+const { exportWatchHistory } = require("../controllers/watchHistory.controller");
 
 router.post(
   "/register",
@@ -34,5 +36,13 @@ router.patch(
   usersController.updateProfile,
 );
 router.get("/me/stats", requireAuth, userEpisodesController.getWatchStats);
+router.get(
+  "/me/activity",
+  requireAuth,
+  activityYearValidator,
+  validate,
+  userEpisodesController.getWatchActivity,
+);
+router.get("/me/watch-history/export", requireAuth, exportWatchHistory);
 
 module.exports = router;
